@@ -10,6 +10,16 @@ func MergeSortBasic(src []int64) {
 	merge(src, 0, mid, len(src)-1)
 }
 
+func MergeSortBasic2(src []int64) {
+	if len(src) <= 1 {
+		return
+	}
+	mid := len(src)/2
+	MergeSortBasic2(src[:mid])
+	MergeSortBasic2(src[mid:])
+	merge2(src, 0, mid, len(src)-1)
+}
+
 func merge(a []int64, start, mid, end int)  {
 	i := start
 	j := mid
@@ -25,6 +35,38 @@ func merge(a []int64, start, mid, end int)  {
 		}
 		shift(a, i, j-t, j-1)
 		i += t
+	}
+}
+
+func merge2(src []int64, start, mid, end int) {
+	left := start
+	right := mid
+	idx := start
+	for left < mid && right < end {
+		if src[left] > src[right] {
+			interSrc[idx] = src[right]
+			right++
+		} else {
+			interSrc[idx] = src[left]
+			left++
+		}
+		idx++
+	}
+
+	for left < mid {
+		interSrc[idx] = src[left]
+		left++
+		idx++
+	}
+
+	for right < end {
+		interSrc[idx] = src[right]
+		right++
+		idx++
+	}
+
+	for i := start; i < end; i++ {
+		src[i] = interSrc[i]
 	}
 }
 

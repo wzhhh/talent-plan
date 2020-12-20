@@ -21,7 +21,7 @@ func MergeSortConcurrent1(src []int64) {
 		MergeSortConcurrent1(src[mid:])
 	}()
 	wg.Wait()
-	merge(src, 0, mid, len(src)-1)
+	merge2(src, 0, mid, len(src)-1)
 }
 
 func MergeSortConcurrent2(src []int64) {
@@ -41,7 +41,7 @@ func MergeSortConcurrent2(src []int64) {
 		}
 		go func(start, end int) {
 			defer wg.Done()
-			MergeSortBasic(src[start:end])
+			MergeSortBasic2(src[start:end])
 		}(start, end)
 	}
 	wg.Wait()
@@ -63,7 +63,7 @@ func concurrencyMerge(src []int64, nums int) {
 			wg.Add(1)
 			go func(start, mid, end int) {
 				defer wg.Done()
-				merge(src, start, mid, end)
+				merge2(src, start, mid, end)
 			}(start, mid, end)
 		}
 		wg.Wait()
