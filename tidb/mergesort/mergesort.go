@@ -147,6 +147,7 @@ func MergeByChan(a, b []int64) []int64 {
 
 func main() {
 	c := []int64{3, 6, 1, 4, 734, 5567, 432, 2, 57, 43, 5}
+	interSrc = make([]int64, len(c))
 	MergeSortConcurrent2(c)
 	fmt.Println(c)
 }

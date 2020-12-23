@@ -5,6 +5,11 @@ import (
 	"sync"
 )
 
+type partSrc struct {
+	start int
+	end   int
+}
+
 func MergeSortConcurrent1(src []int64) {
 	if len(src) <= 1 {
 		return
@@ -21,7 +26,7 @@ func MergeSortConcurrent1(src []int64) {
 		MergeSortConcurrent1(src[mid:])
 	}()
 	wg.Wait()
-	merge2(src, 0, mid, len(src)-1)
+	merge2(src, 0, mid, len(src))
 }
 
 func MergeSortConcurrent2(src []int64) {
@@ -29,7 +34,8 @@ func MergeSortConcurrent2(src []int64) {
 		return
 	}
 	nums := runtime.NumCPU()
-	//fmt.Println(nums)
+	parts := make([]partSrc, nums)
+	interSrc = make([]int64, len(src))
 	var wg sync.WaitGroup
 	wg.Add(nums)
 	size := len(src)/nums
@@ -39,15 +45,18 @@ func MergeSortConcurrent2(src []int64) {
 		if i == nums-1 {
 			end = len(src)
 		}
+		parts[i] = partSrc{start, end}
 		go func(start, end int) {
 			defer wg.Done()
-			MergeSortBasic2(src[start:end])
+			coreSort(src, start, end)
 		}(start, end)
 	}
 	wg.Wait()
+	//b2UpMerge(src, parts)
 	concurrencyMerge(src, nums)
 	return
 }
+
 
 func concurrencyMerge(src []int64, nums int) {
 	size := len(src)/nums
@@ -56,9 +65,9 @@ func concurrencyMerge(src []int64, nums int) {
 		for j := 0; j < nums; j += i*2 {
 			start := j * size
 			mid := start + i * size
-			end := start + 2*i*size -1
-			if j + 2*i >= nums {
-				end = len(src)-1
+			end := start + 2*i*size
+			if j+2*i == nums {
+				end = len(src)
 			}
 			wg.Add(1)
 			go func(start, mid, end int) {
@@ -69,4 +78,27 @@ func concurrencyMerge(src []int64, nums int) {
 		wg.Wait()
 	}
 	return
+}
+
+func b2UpMerge(src []int64, parts []partSrc) {
+	n := len(parts)
+	for size := 1; size < n; size *= 2 {
+		var wg sync.WaitGroup
+
+		for low := 0; low < n-size; low += size * 2 {
+			start := parts[low].start
+			mid := parts[low+size-1].end
+			endIdx := low + size*2 - 1
+			if endIdx > n-1 {
+				endIdx = n - 1
+			}
+			end := parts[endIdx].end
+			wg.Add(1)
+			go func(start, mid, end int) {
+				defer wg.Done()
+				merge2(src, start, mid, end)
+			}(start, mid, end)
+		}
+		wg.Wait()
+	}
 }

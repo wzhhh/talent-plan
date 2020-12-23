@@ -10,6 +10,7 @@ func MergeSortBasic(src []int64) {
 	merge(src, 0, mid, len(src)-1)
 }
 
+
 func MergeSortBasic2(src []int64) {
 	if len(src) <= 1 {
 		return
@@ -17,7 +18,17 @@ func MergeSortBasic2(src []int64) {
 	mid := len(src)/2
 	MergeSortBasic2(src[:mid])
 	MergeSortBasic2(src[mid:])
-	merge2(src, 0, mid, len(src)-1)
+	merge2(src, 0, mid, len(src)) // race risk
+}
+
+func coreSort(src []int64, start, end int) {
+	if end-start <= 1 {
+		return
+	}
+	mid := (end+start)/2
+	coreSort(src, start, mid)
+	coreSort(src, mid, end)
+	merge2(src, start, mid, end)
 }
 
 func merge(a []int64, start, mid, end int)  {

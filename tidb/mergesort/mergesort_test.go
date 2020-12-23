@@ -22,6 +22,12 @@ func prepare(src []int64) {
 	}
 }
 
+func prepare2(src []int64) {
+	for i := range src {
+		src[i] = int64(rand.Intn(len(src)))
+	}
+}
+
 type sortTestSuite struct{}
 
 func (s *sortTestSuite) TestMergeSort(c *check.C) {
