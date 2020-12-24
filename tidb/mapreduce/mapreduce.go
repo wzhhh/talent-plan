@@ -159,7 +159,26 @@ func (c *MRCluster) run(jobName, dataDir string, mapF MapF, reduceF ReduceF, map
 
 	// reduce phase
 	// YOUR CODE HERE :D
-	panic("YOUR CODE HERE")
+	//panic("YOUR CODE HERE")
+	t := &task{
+		dataDir:    dataDir,
+		jobName:    jobName,
+		phase:      reducePhase,
+		nReduce:    nReduce,
+		nMap:       nMap,
+		mapF:       mapF,
+		reduceF:    reduceF,
+	}
+	t.wg.Add(1)
+	go func() { c.taskCh <- t }()
+	t.wg.Wait()
+
+	mpath := mergeName(dataDir, jobName, nReduce)
+	content, err := ioutil.ReadFile(mpath)
+	if err != nil {
+		panic(err)
+	}
+	notify <- []string{string(content)}
 }
 
 func ihash(s string) int {
